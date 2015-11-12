@@ -58,7 +58,9 @@ echo $issue->title. "\n";
 echo $issue->body ."\n";
 
 $issue = $issues[50];
+
 echo $issue->title. "\n";
+
 echo $issue->body ."\n";
 
 
