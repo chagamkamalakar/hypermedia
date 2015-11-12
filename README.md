@@ -1,4 +1,4 @@
-# <a href="http://apievangelist.com/2014/01/07/what-is-a-hypermedia-api" target="_blank">HyperMedia </a> Client API
+# <a href="http://apievangelist.com/2014/01/07/what-is-a-hypermedia-api" target="_blank">HyperMedia </a> Client
 
 The main goal of this project is to provide fluent client interface to access REST Server API complying <a href="https://en.wikipedia.org/wiki/HATEOAS" target="_blank"> HATEOS.</a>
 
