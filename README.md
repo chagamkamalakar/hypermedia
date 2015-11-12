@@ -34,8 +34,12 @@ To understand how to use it see the GitHub file.it's an example to access GitHub
 
 Pagination is supported in ArrayLike access
 
+## Example code
+
 $client = new \GuzzleHttp\Client();
+
 $gitHub = new \HyperMedia\GitHub($client);
+
 $user = $gitHub->users('laravel');
 
 $repos = $user->repos();
