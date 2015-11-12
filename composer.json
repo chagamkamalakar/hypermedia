@@ -24,7 +24,8 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "HyperMedia\\": "src/HyperMedia"
+            "HyperMedia\\": "src/HyperMedia",
+            "Example\\" : "example/"
         }
     },
     "autoload-dev": {
