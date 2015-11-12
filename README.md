@@ -20,13 +20,13 @@ In order to make use of this things
  2) your class must implement ArrayAccess interface to provide pagination support ( no need to implement any method,
  all these methods are implemented by Pagination trait)
 
-# abstract function getBaseURL();
+### abstract function getBaseURL();
     return the base uri for API Server
-# abstract function authDetailsUserNameAndPWD()
+### abstract function authDetailsUserNameAndPWD()
     If limit rating is there on API ( for Github the limit is 60 req/hr without any authentication)
     provide credentials (user_name & password) respectively in array format ['user_name','password'].
 
-# abstract function possibleURLs($resource);
+### abstract function possibleURLs($resource);
     see the GitHub example file code there is description is given with an example for Accessing Github api
 
 
