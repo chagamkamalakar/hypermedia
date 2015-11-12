@@ -43,13 +43,18 @@ $gitHub = new \HyperMedia\GitHub($client);
 $user = $gitHub->users('laravel');
 
 $repos = $user->repos();
+
 $repo = $repos[5];
 
 
 $issues = $repo->issues();
+
 $tags = $repo->tags();
+
 $issue = $issues[0];
+
 echo $issue->title. "\n";
+
 echo $issue->body ."\n";
 
 $issue = $issues[50];
