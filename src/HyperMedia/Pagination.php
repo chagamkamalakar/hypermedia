@@ -36,22 +36,11 @@ trait Pagination
     }
 
     public function offsetSet($index, $value) {
-        if($index) {
-            $this->collection[$index] = $value;
-        } else {
-            $this->collection[] = $value;
-        }
-        return true;
-
+        return false;
     }
 
     public function offsetUnset($index) {
-        unset($this->collection[$index]);
-        return true;
-    }
-
-    public function getContents() {
-        return $this->collection;
+       return false;
     }
 
     /**
@@ -68,15 +57,7 @@ trait Pagination
             }
             // get link header
             //var_dump($this->header_links,$this->extractLinkHeaderFromResponse());
-            $next_url = $this->header_links['next'];
-            $next_url = $next_url[0]['uri'];
-            // if next rel is present, then get next page
-
-            // send request and store details
-            /*$client = $this->createClientObject($next);
-            var_dump($client->uri);
-            $this->header_links = $client->header_links;
-            $this->collection = array_merge($this->collection,$client->collection);*/
+            $next_url = $this->paginationUrlForNEXT();
 
             $this->retrieveNextPage($next_url);
             $current_size = $this->collectionSize();
@@ -118,6 +99,16 @@ trait Pagination
         $client = $this->createClientObject($item['url']);//$this->sendRequest($item['url']);
 
         return $client;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function paginationUrlForNEXT()
+    {
+        $next_url = $this->header_links['next'];
+        $next_url = $next_url[0]['uri'];
+        return $next_url;
     }
 
 

@@ -4,6 +4,7 @@ namespace HyperMedia;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use HyperMedia\Exceptions\ForBiddenException;
 use HyperMedia\Exceptions\InvalidResourceAccessException;
 use HyperMedia\Helpers\Inflect;
 use HyperMedia\Helpers\LinkHeaderParser;
@@ -23,14 +24,15 @@ trait HttpClient
     function __construct(Client $client)
     {
         $this->http_client = $client;
+        // load the main/home page
         $this->sendRequest($this->getBaseURL());
+
     }
 
     public function __call($method,$args=[])
     {
         //var_dump($method,$this->getClient());
         $uri = $this->verifyNextStatePossibility($method);
-
 
         //to give fluent interface functionality
         return $this->createClientObject($uri,$args);
@@ -54,15 +56,14 @@ trait HttpClient
      */
     function sendRequest($url){
         try {
-            $this->response = $this->http_client->get($url,['auth' => $this->authDetailsUserNameAndPWD() ]);
+            $this->response = $this->http_client->get($url,['auth' => $this->authDetailsUserNameAndPWD()]);
         }catch (ClientException $ce){
-            return null;
-        }
 
+            return $this->isRequestForBidden($ce);;
+        }
         return $this->response;
     }
 
-     abstract function authDetailsUserNameAndPWD();
 
     function createClientObject($uri,$args=null){
 
@@ -78,6 +79,7 @@ trait HttpClient
 
         //$uri = $this->prepareURI($method,$args);
         $client->sendRequest($client->uri);
+
         // throws exception
         //$this->validateLastRequestStatus();
 
@@ -90,13 +92,16 @@ trait HttpClient
     }
 
     function validateLastRequestStatus() {
-        //var_dump($this->response,"validate");
+
         if(!is_null($this->response)) {
 
             $status_code = $this->response->getStatusCode();
 
             if ($status_code >= 200 && $status_code <= 299) {
                 return true;
+            } else if($status_code == 401 || $status_code == 403){
+                $body = $this->extractBodyFromResponse();
+                throw new ForBiddenException($body['message']);
             }
         }
         throw  new InvalidResourceAccessException("Invalid Resource is accessed");
@@ -120,7 +125,10 @@ trait HttpClient
     }
 
     function extractBodyFromResponse() {
-        return json_decode($this->response->getBody(),true);
+        if(!is_null($this->response)) {
+            return json_decode($this->response->getBody(), true);
+        }
+        return "";
     }
     function extractLinkHeaderFromResponse() {
         $link_header = $this->response->getHeader('Link');
@@ -131,14 +139,10 @@ trait HttpClient
         return [];
     }
 
-    /**
-     * @return string base_url
-     */
-     function getBaseURL() {
-         return static::$base_url;
-     }
+
 
      function verifyNextStatePossibility($resource) {
+
          $body = $this->extractBodyFromResponse();
 
          $next_states = $this->possibleURLs($resource);
@@ -150,12 +154,6 @@ trait HttpClient
              }
          }
          throw new InvalidResourceAccessException("Not possible to access the specified resource");
-     }
-
-     function possibleURLs($resource){
-         $plural = Inflect::pluralize($resource). "_url";
-         $singular = Inflect::singularize($resource) . "_url";
-         return [$plural,$singular];
      }
 
     /**
@@ -182,30 +180,49 @@ trait HttpClient
     }
 
     /**
+     * Case 1:
+     *   json file for  github.com/users
+     * [
+     *  {
+     *  },
+     *  {
+     *  }
+     * ]
+     *
+     * json_decode -- returns as an array of objects
+     *
+     * Case 2:
+     *
+     * json file fir github.com/users/laravel
+     *
+     * {
+     * }
+     * json_decode -- returns as object
+     *
      * @return bool
      */
     public function isResponseBodyArray()
     {
-        /* Case 1:
-           json file for  github.com/users
-         * [
-         *  {
-         *  },
-         *  {
-         *  }
-         * ]
-         *
-         * json_decode -- returns as an array of objects
-         */
-        /* Case 2:
-         *
-         * json file fir github.com/users/laravel
-         *
-         * {
-         * }
-         * json_decode -- returns as object
-         */
         return is_array(json_decode($this->response->getBody()));
+    }
+
+
+    abstract function authDetailsUserNameAndPWD();
+    abstract function getBaseURL();
+    abstract function possibleURLs($resource);
+
+
+    /**
+     * this is called when exception is thrown on sending request to API Server
+     * @param ClientException $ce
+     * @throws \Exception
+     */
+    public function isRequestForBidden(ClientException $ce)
+    {
+        $this->response = $ce->getResponse();
+        $this->validateLastRequestStatus();
+        // throw
+        throw new \Exception("Unknown problem happened,please debug it");
     }
 
 }
