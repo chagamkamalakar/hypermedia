@@ -3,8 +3,7 @@
 namespace Tests;
 
 
-use GuzzleHttp\Client;
-use HyperMedia\GitHub;
+use Example\GitHub;
 
 class GitHubTest extends \PHPUnit_Framework_TestCase
 {
@@ -12,7 +11,7 @@ class GitHubTest extends \PHPUnit_Framework_TestCase
     /**
      * @const string
      */
-    const BASEURL = 'https://api.github.com/';
+    const BASEURL = 'https://api.github.com';
 
     /**
      * @var GuzzleHttp\Message\Response
@@ -54,11 +53,11 @@ class GitHubTest extends \PHPUnit_Framework_TestCase
     public function testTrueIsTrue()
 
     {
-        $url = self::BASEURL . 'users';
+        $url = self::BASEURL;
         $client = $this->prepareMockedGuzzleClient($url);
         $gitHub = new GitHub($client);
         //$gitHub->setClient($client);
-        $users = $gitHub->users();
+        //$users = $gitHub->users('laravel');
     }
     private function prepareMockedGuzzleClient($url)
     {
@@ -84,10 +83,10 @@ class GitHubTest extends \PHPUnit_Framework_TestCase
         $this->response = $this->getMock('\GuzzleHttp\Message\Response',['getBody','getHeader']);
 
         // set Promises & Predictions
-        $this->response->expects($this->once())
+        $this->response->expects($this->any())
             ->method('getHeader')
             ->with('Link')->will($this->returnValue(array()));
-        $this->response->expects($this->once())
+        $this->response->expects($this->any())
             ->method('getBody')
             ->will($this->returnValue( json_encode(['OOOOOOOOOOOOOOOOOOPS'])));
 

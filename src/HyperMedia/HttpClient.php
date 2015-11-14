@@ -58,8 +58,11 @@ trait HttpClient
         try {
             $this->response = $this->http_client->get($url,['auth' => $this->authDetailsUserNameAndPWD()]);
         }catch (ClientException $ce){
+            // if request has response code - 403, then throw exception
+            $this->isRequestForBidden($ce);
 
-            return $this->isRequestForBidden($ce);;
+            // if some other exception
+            throw new \Exception("Unknown problem happened,please debug it");
         }
         return $this->response;
     }
@@ -221,8 +224,7 @@ trait HttpClient
     {
         $this->response = $ce->getResponse();
         $this->validateLastRequestStatus();
-        // throw
-        throw new \Exception("Unknown problem happened,please debug it");
+
     }
 
 }
